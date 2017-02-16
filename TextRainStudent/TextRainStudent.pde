@@ -14,7 +14,8 @@ boolean inputMethodSelected = false;
 int startTime;
 int frame;
 boolean turn_on_filter = false;
-float filter_val = 0;
+float filter_val = 0.5;
+
 
 void loadFrame() {
   int newFrame = 1 + (millis() - startTime)/100; // get new frame every 0.1 sec
@@ -32,7 +33,7 @@ void loadFrame() {
 
 
 void setup() {
-  size(1280, 720);  
+  size(1280, 720);
   inputImage = createImage(width, height, RGB);
 }
 
@@ -56,7 +57,7 @@ void draw() {
     cameras = Capture.list();
     int y=40;
     text("O: Offline mode, test with TextRainInput.mov movie file instead of live camera feed.", 20, y);
-    y += 40; 
+    y += 40;
     for (int i = 0; i < min(9,cameras.length); i++) {
       text(i+1 + ": " + cameras[i], 20, y);
       y += 40;
@@ -78,13 +79,15 @@ void draw() {
     loadFrame();
     inputImage.copy(mov, 0,0,mov.width,mov.height, 0,0,inputImage.width,inputImage.height);
   }
-  
+
 
   // Fill in your code to implement the rest of TextRain here..
   inputImage = flip_photo(inputImage);
 
 
   // Tip: This code draws the current input image to the screen
+  if (turn_on_filter)
+    inputImage.filter(THRESHOLD, filter_val);
   set(0, 0, inputImage);
 
 
@@ -92,10 +95,10 @@ void draw() {
 
 
 void keyPressed() {
-  
+
   if (!inputMethodSelected) {
     // If we haven't yet selected the input method, then check for 0 to 9 keypresses to select from the input menu
-    if ((key >= '0') && (key <= '9')) { 
+    if ((key >= '0') && (key <= '9')) {
       int input = key - '0';
       if (input == 0) {
         println("Offline mode selected.");
@@ -104,7 +107,7 @@ void keyPressed() {
         inputMethodSelected = true;
       }
       else if ((input >= 1) && (input <= 9)) {
-        println("Camera " + input + " selected.");           
+        println("Camera " + input + " selected.");
         // The camera can be initialized directly using an element from the array returned by list():
         cam = new Capture(this, cameras[input-1]);
         cam.start();
@@ -116,17 +119,26 @@ void keyPressed() {
 
   // This part of the keyPressed routine gets called after the input selection screen during normal execution of the program
   // Fill in your code to handle keypresses here..
-  
+
   if (key == CODED) {
     if (keyCode == UP) {
       // up arrow key pressed
+      if (turn_on_filter) {
+        if (filter_val + 0.005 <= 1)
+          filter_val += 0.005;
+      }
     }
     else if (keyCode == DOWN) {
       // down arrow key pressed
+      if (turn_on_filter) {
+        if (filter_val - 0.005 >= 0)
+          filter_val -= 0.005;
+      }
     }
   }
   else if (key == ' ') {
     // space bar pressed
-  } 
-  
+    turn_on_filter = !turn_on_filter;
+  }
+
 }
