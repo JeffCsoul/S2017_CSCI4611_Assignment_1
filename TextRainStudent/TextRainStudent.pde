@@ -13,6 +13,8 @@ PImage inputImage;
 boolean inputMethodSelected = false;
 int startTime;
 int frame;
+boolean turn_on_filter = false;
+float filter_val = 0;
 
 void loadFrame() {
   int newFrame = 1 + (millis() - startTime)/100; // get new frame every 0.1 sec
@@ -20,7 +22,7 @@ void loadFrame() {
     return;
   frame = newFrame;
   String movieName = "TextRainInput";
-  String filePath = movieName + "/" + nf(frame,3) + ".jpg";
+  String filePath = movieName + "/" + nf((frame % 271) + 1, 3) + ".jpg";
   mov = loadImage(filePath);
   if (mov == null) {
     startTime = millis();
@@ -34,6 +36,18 @@ void setup() {
   inputImage = createImage(width, height, RGB);
 }
 
+PImage flip_photo (PImage in_image) {
+  PImage return_photo;
+  return_photo = createImage(in_image.width, in_image.height, RGB);
+  for (int j = 0; j < in_image.height; j++) {
+    for (int i = 0; i < in_image.width; i++) {
+      int index = (in_image.width - i - 1) + in_image.width*j;
+      int new_index = i + in_image.width*j;
+      return_photo.pixels[new_index] = in_image.pixels[index];
+    }
+  }
+  return return_photo;
+}
 
 void draw() {
   // When the program first starts, draw a menu of different options for which camera to use for input
@@ -67,7 +81,7 @@ void draw() {
   
 
   // Fill in your code to implement the rest of TextRain here..
-
+  inputImage = flip_photo(inputImage);
 
 
   // Tip: This code draws the current input image to the screen
