@@ -10,12 +10,14 @@ String[] cameras;
 Capture cam;
 PImage mov;
 PImage inputImage;
+PImage bw_img;
+PImage output_img;
 boolean inputMethodSelected = false;
 int startTime;
 int frame;
 boolean turn_on_filter = false;
 float filter_val = 0.5;
-
+int ht, wd;
 
 void loadFrame() {
   int newFrame = 1 + (millis() - startTime)/100; // get new frame every 0.1 sec
@@ -29,6 +31,68 @@ void loadFrame() {
     startTime = millis();
     loadFrame();
   }
+}
+
+class TextRain{
+  int x;
+  int y;
+  char letter;
+  int upspeed;
+  int downspeed;
+  int tsize;
+  color c;
+
+  TextRain() {
+    y = 0;
+    x = (int) random(0, wd);
+    if (random(0, 2) < 1) {
+      letter = char(int(random(0,26)) + 'a');
+    }
+    else {
+      letter = char(int(random(0,26)) + 'A');
+    }
+    upspeed = max(2, 0);
+    downspeed = max(4, int(random(4, 8)));
+    tsize = int(random(10, 20));
+    c = color(int(random(0, 255)), int(random(0, 255)), int(random(0, 255)));
+  }
+
+  void downLetter(PImage bw_img) {
+    int index = x + bw_img.width * y;
+    int left_d_test_point = x + bw_img.width * (y + tsize);
+    int right_d_test_point = x + bw_img.width * (y + tsize);
+    int mid_u_test_point = (x + tsize / 2) + bw_img.width * (y + tsize - 5);
+    boolean left_d = (bw_img.pixels[left_d_test_point] != color(0,0,0));
+    boolean right_d = (bw_img.pixels[right_d_test_point] != color(0,0,0));
+    boolean mid_up = (bw_img.pixels[mid_u_test_point] != color(0,0,0));
+    if (!mid_up) {
+      y -= upspeed;
+    } else if (left_d && right_d) {
+      y += downspeed;
+    } else if (left_d && !right_d) {
+      x -= upspeed;
+    } else if (!left_d && right_d) {
+      x += upspeed;
+    } else {
+      y -= upspeed / 2;
+    }
+  }
+
+  void drawLetter(PImage bw_img) {
+    downLetter(bw_img);
+    size(tsize, tsize);
+    fill(c);
+    text(letter, x, y);
+  }
+
+  boolean is_valid(PImage bw_img) {
+    if (x < 0) return false;
+    if (x + tsize >= bw_img.width) return false;
+    if (y < 0) return false;
+    if (y + tsize >= bw_img.height) return false;
+    return true;
+  }
+
 }
 
 
@@ -48,6 +112,16 @@ PImage flip_photo (PImage in_image) {
     }
   }
   return return_photo;
+}
+
+PImage copy_image (PImage inputImage) {
+  PImage return_img = createImage(inputImage.width, inputImage.height, RGB);
+  for (int j = 0; j < inputImage.height; j++)
+    for (int i = 0; i < inputImage.width; i++) {
+      int index = i + inputImage.width * j;
+      return_img.pixels[index] = inputImage.pixels[index];
+    }
+  return return_img;
 }
 
 void draw() {
@@ -79,18 +153,25 @@ void draw() {
     loadFrame();
     inputImage.copy(mov, 0,0,mov.width,mov.height, 0,0,inputImage.width,inputImage.height);
   }
-
+  wd = inputImage.width;
+  ht = inputImage.height;
 
   // Fill in your code to implement the rest of TextRain here..
   inputImage = flip_photo(inputImage);
 
-
+  bw_img = copy_image(inputImage);
+  bw_img.filter(THRESHOLD, filter_val);
   // Tip: This code draws the current input image to the screen
-  if (turn_on_filter)
-    inputImage.filter(THRESHOLD, filter_val);
-  set(0, 0, inputImage);
+  if (turn_on_filter) {
+    output_img = copy_image(bw_img);
+  }
+  else {
+    output_img = copy_image(inputImage);
+  }
 
 
+
+  set(0, 0, output_img);
 }
 
 
