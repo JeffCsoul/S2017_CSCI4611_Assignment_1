@@ -20,6 +20,7 @@ int ht, wd;
 ArrayList rains;
 float time_gap = 50;
 int prev_time = -1;
+PFont myFont;
 
 void loadFrame() {
   int newFrame = 1 + (millis() - startTime)/100; // get new frame every 0.1 sec
@@ -86,7 +87,8 @@ class TextRain{
   }
 
   void drawLetter() {
-    textSize(tsize);
+    // textSize(tsize);
+    textFont(myFont, tsize);
     fill(c);
     text(letter, x, y);
   }
@@ -106,6 +108,7 @@ void setup() {
   size(1280, 720);
   inputImage = createImage(width, height, RGB);
   rains = new ArrayList();
+  myFont = createFont("Calibri", 32);
 }
 
 PImage flip_photo (PImage in_image) {
