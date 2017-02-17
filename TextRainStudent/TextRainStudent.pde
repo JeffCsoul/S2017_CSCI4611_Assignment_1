@@ -10,7 +10,6 @@ String[] cameras;
 Capture cam;
 PImage mov;
 PImage inputImage;
-PImage bw_img;
 PImage output_img;
 boolean inputMethodSelected = false;
 int startTime;
@@ -18,6 +17,7 @@ int frame;
 boolean turn_on_filter = false;
 float filter_val = 0.5;
 int ht, wd;
+ArrayList rains;
 
 void loadFrame() {
   int newFrame = 1 + (millis() - startTime)/100; // get new frame every 0.1 sec
@@ -76,11 +76,13 @@ class TextRain{
     } else {
       y -= upspeed / 2;
     }
+    x = min(x, bw_img.width - tsize - 1);
+    x = max(0, x);
+    y = max(0, y);
   }
 
-  void drawLetter(PImage bw_img) {
-    downLetter(bw_img);
-    size(tsize, tsize);
+  void drawLetter() {
+    textSize(tsize);
     fill(c);
     text(letter, x, y);
   }
@@ -99,6 +101,8 @@ class TextRain{
 void setup() {
   size(1280, 720);
   inputImage = createImage(width, height, RGB);
+  rains = new ArrayList();
+  rains.add(new TextRain());
 }
 
 PImage flip_photo (PImage in_image) {
@@ -158,7 +162,7 @@ void draw() {
 
   // Fill in your code to implement the rest of TextRain here..
   inputImage = flip_photo(inputImage);
-
+  PImage bw_img;
   bw_img = copy_image(inputImage);
   bw_img.filter(THRESHOLD, filter_val);
   // Tip: This code draws the current input image to the screen
@@ -168,10 +172,16 @@ void draw() {
   else {
     output_img = copy_image(inputImage);
   }
-
-
-
   set(0, 0, output_img);
+  for (int i = rains.size() - 1; i >= 0; i--) {
+    TextRain atext = (TextRain) rains.get(i);
+    if (!atext.is_valid(bw_img)) rains.remove(i);
+  }
+  for (int i = rains.size() - 1; i >= 0; i--) {
+    TextRain atext = (TextRain) rains.get(i);
+    atext.downLetter(bw_img);
+    atext.drawLetter();
+  }
 }
 
 
