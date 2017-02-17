@@ -59,23 +59,25 @@ class TextRain{
 
   void downLetter(PImage bw_img) {
     int index = x + bw_img.width * y;
-    int left_d_test_point = x + bw_img.width * (y + tsize);
-    int right_d_test_point = x + bw_img.width * (y + tsize);
-    int mid_u_test_point = (x + tsize / 2) + bw_img.width * (y + tsize - 5);
-    boolean left_d = (bw_img.pixels[left_d_test_point] != color(0,0,0));
-    boolean right_d = (bw_img.pixels[right_d_test_point] != color(0,0,0));
+
+    int mid_u_test_point = (x + tsize / 2) + bw_img.width * (y + tsize - 2);
+    int left_check_point = (x) + bw_img.width * (y + tsize / 5 * 4);
+    int right_check_point = (x + tsize) + bw_img.width * (y + tsize / 5 * 4);
+    int mid_d_test_point = (x + tsize / 2) + bw_img.width * (y + tsize);
+
     boolean mid_up = (bw_img.pixels[mid_u_test_point] != color(0,0,0));
-    if (!mid_up) {
-      y -= upspeed;
-    } else if (left_d && right_d) {
+    boolean left_p = (bw_img.pixels[left_check_point] != color(0,0,0));
+    boolean right_p = (bw_img.pixels[right_check_point] != color(0,0,0));
+    boolean bottom_mid = (bw_img.pixels[mid_d_test_point] != color(0,0,0));
+
+    if (bottom_mid)
       y += downspeed;
-    } else if (left_d && !right_d) {
+    if (left_p)
       x -= upspeed;
-    } else if (!left_d && right_d) {
+    if (right_p)
       x += upspeed;
-    } else {
-      y -= upspeed / 2;
-    }
+    if (!mid_up)
+      y -= upspeed;
     x = min(x, bw_img.width - tsize - 1);
     x = max(0, x);
     y = max(0, y);
@@ -102,7 +104,6 @@ void setup() {
   size(1280, 720);
   inputImage = createImage(width, height, RGB);
   rains = new ArrayList();
-  rains.add(new TextRain());
 }
 
 PImage flip_photo (PImage in_image) {
@@ -176,6 +177,14 @@ void draw() {
   for (int i = rains.size() - 1; i >= 0; i--) {
     TextRain atext = (TextRain) rains.get(i);
     if (!atext.is_valid(bw_img)) rains.remove(i);
+  }
+  if (rains.size() < 1024) {
+    if (random(0, 2) < 0.5) {
+      int num_of_new = (int) random(0,5);
+      for (int i = 0; i < num_of_new; i++) {
+          rains.add(new TextRain());
+      }
+    }
   }
   for (int i = rains.size() - 1; i >= 0; i--) {
     TextRain atext = (TextRain) rains.get(i);
