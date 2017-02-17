@@ -54,7 +54,7 @@ class TextRain{
     else {
       letter = char(int(random(0,26)) + 'A');
     }
-    upspeed = int(max(10 * (time_gap / 50.0), 2));
+    upspeed = 5;
     downspeed = int(max(random(10, 20) * (time_gap / 50.0) , 2));
     tsize = int(random(10, 20));
     c = color(int(random(0, 255)), int(random(0, 255)), int(random(0, 255)));
