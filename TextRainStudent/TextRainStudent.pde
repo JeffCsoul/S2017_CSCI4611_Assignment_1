@@ -18,6 +18,8 @@ boolean turn_on_filter = false;
 float filter_val = 0.5;
 int ht, wd;
 ArrayList rains;
+float time_gap = 50;
+int prev_time = -1;
 
 void loadFrame() {
   int newFrame = 1 + (millis() - startTime)/100; // get new frame every 0.1 sec
@@ -51,8 +53,8 @@ class TextRain{
     else {
       letter = char(int(random(0,26)) + 'A');
     }
-    upspeed = max(4, 0);
-    downspeed = max(5, int(random(5, 10)));
+    upspeed = int(max(10 * (time_gap / 50.0), 2));
+    downspeed = int(max(random(10, 20) * (time_gap / 50.0) , 2));
     tsize = int(random(10, 20));
     c = color(int(random(0, 255)), int(random(0, 255)), int(random(0, 255)));
   }
@@ -132,6 +134,11 @@ PImage copy_image (PImage inputImage) {
 void draw() {
   // When the program first starts, draw a menu of different options for which camera to use for input
   // The input method is selected by pressing a key 0-9 on the keyboard
+  if (prev_time != -1) {
+    time_gap = millis() - prev_time;
+  }
+  // System.out.print(time_gap);
+  prev_time = millis();
   if (!inputMethodSelected) {
     cameras = Capture.list();
     int y=40;
@@ -178,7 +185,7 @@ void draw() {
     TextRain atext = (TextRain) rains.get(i);
     if (!atext.is_valid(bw_img)) rains.remove(i);
   }
-  if (rains.size() < 8192) {
+  if (rains.size() < 32767) {
     if (random(0, 2) < 0.5) {
       int num_of_new = (int) random(0,5);
       for (int i = 0; i < num_of_new; i++) {
