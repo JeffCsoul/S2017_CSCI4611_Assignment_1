@@ -51,8 +51,8 @@ class TextRain{
     else {
       letter = char(int(random(0,26)) + 'A');
     }
-    upspeed = max(2, 0);
-    downspeed = max(4, int(random(4, 8)));
+    upspeed = max(4, 0);
+    downspeed = max(5, int(random(5, 10)));
     tsize = int(random(10, 20));
     c = color(int(random(0, 255)), int(random(0, 255)), int(random(0, 255)));
   }
@@ -178,7 +178,7 @@ void draw() {
     TextRain atext = (TextRain) rains.get(i);
     if (!atext.is_valid(bw_img)) rains.remove(i);
   }
-  if (rains.size() < 1024) {
+  if (rains.size() < 8192) {
     if (random(0, 2) < 0.5) {
       int num_of_new = (int) random(0,5);
       for (int i = 0; i < num_of_new; i++) {
